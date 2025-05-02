@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
-    SensorEntityDescription,
     SensorStateClass,
 )
 
@@ -23,13 +22,15 @@ from homeassistant.const import (
 )
 from homeassistant.helpers.icon import icon_for_battery_level
 
+
 from .entity import XpengEntity
 
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-
-#    from .coordinator import XpengDataUpdateCoordinator
-from .data import XpengConfigEntry
+if TYPE_CHECKING:
+    from homeassistant.core import HomeAssistant
+    from homeassistant.helpers.entity_platform import AddEntitiesCallback
+    from .data import XpengConfigEntry
+    from .coordinator import XpengDataUpdateCoordinator
+    from .enode_models import Vehicle
 
 import logging
 
@@ -42,8 +43,6 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the sensor platform."""
-    print("async_setup_entry sensor")
-
     entities = []
     for vehicle in entry.runtime_data.client.vehicles:
         _LOGGER.debug("Setting up sensor for %s", vehicle)
@@ -63,7 +62,10 @@ class XpengCarBattery(XpengEntity, SensorEntity):
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_icon = "mdi:battery"
 
-    def __init__(self, vehicle, coordinator):
+    def __init__(
+        self, vehicle: Vehicle, coordinator: XpengDataUpdateCoordinator
+    ) -> None:
+        """Create Xpeng Car Battery sensor entity."""
         super().__init__(vehicle, coordinator)
         _LOGGER.debug(
             "Create XpengCarBattery: '%s' Device '%s'", self.name, self.device_info
@@ -98,7 +100,7 @@ class XpengCarBattery(XpengEntity, SensorEntity):
 
 
 class XpengCarBatteryTarget(XpengEntity, SensorEntity):
-    """Representation of the Xpeng car battery sensor."""
+    """Representation of the Xpeng car battery target charge level."""
 
     entity_name = "battery target"
     _attr_device_class = SensorDeviceClass.BATTERY
@@ -106,7 +108,10 @@ class XpengCarBatteryTarget(XpengEntity, SensorEntity):
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_icon = "mdi:battery"
 
-    def __init__(self, vehicle, coordinator):
+    def __init__(
+        self, vehicle: Vehicle, coordinator: XpengDataUpdateCoordinator
+    ) -> None:
+        """Create sensor entity for Xpeng battery target charge level."""
         super().__init__(vehicle, coordinator)
         _LOGGER.debug(
             "Create XpengCarBatteryTarget: '%s' Device '%s'",

@@ -1,10 +1,10 @@
-"""Sample API Client."""
+"""Xpeng API Client."""
 
 from __future__ import annotations
 
+import datetime
 import socket
 from typing import Any
-import datetime
 
 import aiohttp
 from aiohttp import BasicAuth
@@ -74,7 +74,9 @@ class XpengApiClient:
 
         self._token = result["access_token"]
         self._token_expires = result["expires_in"]
-        # self._token_expires_at = datetime.now() + timedelta(seconds=self._token_expires)
+        self._token_expires_at = datetime.datetime.now(
+            tz=datetime.UTC
+        ) + datetime.timedelta(seconds=self._token_expires)
 
     async def async_get_data(self) -> Any:
         """Get data from the API."""
@@ -92,21 +94,14 @@ class XpengApiClient:
         method: str,
         url: str,
         data: dict | None = None,
-        headers: dict = {},
+        headers: dict | None = None,
     ) -> Any:
         """Get information from the API."""
-        if headers is not None and "Authorization" in headers:
+        if headers is None:
+            headers = {}
+        if "Authorization" in headers:
             headers.pop("Authorization")
         headers["Authorization"] = f"Bearer {self._token}"
-        async with async_timeout.timeout(10):
-            response = await self._session.request(
-                method=method,
-                url=url,
-                headers=headers,
-                json=data,
-            )
-            _verify_response_or_raise(response)
-            return await response.json()
 
         try:
             async with async_timeout.timeout(10):
