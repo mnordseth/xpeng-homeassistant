@@ -11,6 +11,7 @@ from aiohttp import BasicAuth
 import async_timeout
 
 from .enode_models import EnodeResponse
+from .const import LOGGER
 
 ENODE_URL = "https://enode-api.production.enode.io"
 ENODE_OAUTH_URL = "https://oauth.production.enode.io/"
@@ -60,6 +61,7 @@ class XpengApiClient:
 
     async def async_get_token(self) -> Any:
         """Get oauth token."""
+        LOGGER.debug("async_get_token()")
         auth = BasicAuth(self._client_id, self._client_secret)
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -78,8 +80,15 @@ class XpengApiClient:
             tz=datetime.UTC
         ) + datetime.timedelta(seconds=self._token_expires)
 
+    async def async_refresh_token(self) -> None:
+        expires_in = self._token_expires_at - datetime.datetime.now(tz=datetime.UTC)
+        if expires_in < datetime.timedelta(seconds=120):
+            LOGGER.debug("Refreshing token, expires in %s", expires_in)
+            await self.async_get_token()
+
     async def async_get_data(self) -> Any:
         """Get data from the API."""
+        LOGGER.debug("async_get_data()")
         result = await self._api_wrapper(
             method="get",
             url=f"{ENODE_URL}/vehicles",
@@ -97,6 +106,7 @@ class XpengApiClient:
         headers: dict | None = None,
     ) -> Any:
         """Get information from the API."""
+        await self.async_refresh_token()
         if headers is None:
             headers = {}
         if "Authorization" in headers:
