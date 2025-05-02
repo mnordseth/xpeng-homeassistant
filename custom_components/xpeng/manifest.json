@@ -1,0 +1,12 @@
+{
+  "domain": "xpeng",
+  "name": "Xpeng",
+  "codeowners": [
+    "@mnordseth"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/mnordseth/xpeng-homeassistant",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/mnordseth/xpeng-homeassistant/issues",
+  "version": "0.1.0"
+}

@@ -2,15 +2,15 @@
     "config": {
         "step": {
             "user": {
-                "description": "If you need help with the configuration have a look here: https://github.com/ludeeus/integration_blueprint",
+                "description": "If you need help with the configuration have a look here: https://github.com/mnordseth/xpeng-homeassistant",
                 "data": {
-                    "username": "Username",
-                    "password": "Password"
+                    "client_id": "Enode Client ID",
+                    "client_secret": "Enode Client Secret"
                 }
             }
         },
         "error": {
-            "auth": "Username/Password is wrong.",
+            "auth": "Client ID or Secret is wrong.",
             "connection": "Unable to connect to the server.",
             "unknown": "Unknown error occurred."
         },
