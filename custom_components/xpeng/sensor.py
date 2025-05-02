@@ -14,7 +14,7 @@ from homeassistant.const import (
     PERCENTAGE,
     #    UnitOfEnergy,
     UnitOfLength,
-    #    UnitOfPower,
+    UnitOfPower,
     #    UnitOfPressure,
     #    UnitOfSpeed,
     #    UnitOfTemperature,
@@ -30,7 +30,6 @@ if TYPE_CHECKING:
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
     from .data import XpengConfigEntry
     from .coordinator import XpengDataUpdateCoordinator
-    from .enode_models import Vehicle
 
 import logging
 
@@ -44,11 +43,14 @@ async def async_setup_entry(
 ) -> None:
     """Set up the sensor platform."""
     entities = []
-    for vehicle in entry.runtime_data.client.vehicles:
+    for vehicle_id, vehicle in enumerate(entry.runtime_data.client.vehicles):
         _LOGGER.debug("Setting up sensor for %s", vehicle)
-        entities.append(XpengCarBattery(vehicle, entry.runtime_data.coordinator))
-        entities.append(XpengCarBatteryTarget(vehicle, entry.runtime_data.coordinator))
-        entities.append(XpengCarRange(vehicle, entry.runtime_data.coordinator))
+        entities.append(XpengCarBattery(vehicle_id, entry.runtime_data.coordinator))
+        entities.append(
+            XpengCarBatteryTarget(vehicle_id, entry.runtime_data.coordinator)
+        )
+        entities.append(XpengCarRange(vehicle_id, entry.runtime_data.coordinator))
+        entities.append(XpengCarChargeRate(vehicle_id, entry.runtime_data.coordinator))
 
     async_add_entities(entities, update_before_add=True)
 
@@ -63,10 +65,10 @@ class XpengCarBattery(XpengEntity, SensorEntity):
     _attr_icon = "mdi:battery"
 
     def __init__(
-        self, vehicle: Vehicle, coordinator: XpengDataUpdateCoordinator
+        self, vehicle_id: int, coordinator: XpengDataUpdateCoordinator
     ) -> None:
         """Create Xpeng Car Battery sensor entity."""
-        super().__init__(vehicle, coordinator)
+        super().__init__(vehicle_id, coordinator)
         _LOGGER.debug(
             "Create XpengCarBattery: '%s' Device '%s'", self.name, self.device_info
         )
@@ -80,12 +82,12 @@ class XpengCarBattery(XpengEntity, SensorEntity):
     def native_value(self) -> int:
         """Return battery level."""
         # usable_battery_level matches the Xpeng app and car display
-        return self._vehicle.charge_state.battery_level
+        return self.coordinator.data[self._vehicle_id].charge_state.battery_level
 
     @property
     def icon(self):
         """Return icon for the battery."""
-        charging = self._vehicle.charge_state.is_charging
+        charging = self.coordinator.data[self._vehicle_id].charge_state.is_charging
 
         return icon_for_battery_level(
             battery_level=self.native_value, charging=charging
@@ -95,7 +97,9 @@ class XpengCarBattery(XpengEntity, SensorEntity):
     def extra_state_attributes(self):
         """Return device state attributes."""
         return {
-            "raw_soc": self._vehicle.charge_state.battery_level,
+            "raw_soc": self.coordinator.data[
+                self._vehicle_id
+            ].charge_state.battery_level,
         }
 
 
@@ -109,10 +113,10 @@ class XpengCarBatteryTarget(XpengEntity, SensorEntity):
     _attr_icon = "mdi:battery"
 
     def __init__(
-        self, vehicle: Vehicle, coordinator: XpengDataUpdateCoordinator
+        self, vehicle_id: int, coordinator: XpengDataUpdateCoordinator
     ) -> None:
         """Create sensor entity for Xpeng battery target charge level."""
-        super().__init__(vehicle, coordinator)
+        super().__init__(vehicle_id, coordinator)
         _LOGGER.debug(
             "Create XpengCarBatteryTarget: '%s' Device '%s'",
             self.name,
@@ -128,7 +132,7 @@ class XpengCarBatteryTarget(XpengEntity, SensorEntity):
     def native_value(self) -> int:
         """Return battery level."""
         # usable_battery_level matches the Xpeng app and car display
-        return self._vehicle.charge_state.charge_limit
+        return self.coordinator.data[self._vehicle_id].charge_state.charge_limit
 
     @property
     def icon(self):
@@ -148,4 +152,19 @@ class XpengCarRange(XpengEntity, SensorEntity):
     @property
     def native_value(self) -> float:
         """Return range."""
-        return self._vehicle.charge_state.range
+        return self.coordinator.data[self._vehicle_id].charge_state.range
+
+
+class XpengCarChargeRate(XpengEntity, SensorEntity):
+    """Representation of the Xpeng car charging rate."""
+
+    entity_name = "charge rate"
+    _attr_device_class = SensorDeviceClass.POWER
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = UnitOfPower.KILO_WATT
+    _attr_icon = "mdi:flash"
+
+    @property
+    def native_value(self) -> float:
+        """Return range."""
+        return self.coordinator.data[self._vehicle_id].charge_state.charge_rate or 0

@@ -96,7 +96,7 @@ class XpengApiClient:
 
         enode_response = EnodeResponse.from_json(result)
         self.vehicles = enode_response.data
-        return {}
+        return self.vehicles
 
     async def _api_wrapper(
         self,

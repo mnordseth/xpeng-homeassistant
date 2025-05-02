@@ -30,9 +30,9 @@ async def async_setup_entry(
 ) -> None:
     """Set up the sensor platform."""
     entities = []
-    for vehicle in entry.runtime_data.client.vehicles:
+    for vehicle_id, vehicle in enumerate(entry.runtime_data.client.vehicles):
         _LOGGER.debug("Setting up device tracker for %s", vehicle)
-        entities.append(XpengCarLocation(vehicle, entry.runtime_data.coordinator))
+        entities.append(XpengCarLocation(vehicle_id, entry.runtime_data.coordinator))
 
     async_add_entities(entities, update_before_add=True)
 
@@ -54,24 +54,16 @@ class XpengCarLocation(XpengEntity, TrackerEntity):
         return const.ATTR_GPS
 
     @property
-    def longitude(self):
+    def longitude(self) -> float:
         """Return longitude."""
-        return self._vehicle.location.longitude
+        return self.coordinator.data[self._vehicle_id].location.longitude
 
     @property
-    def latitude(self):
+    def latitude(self) -> float:
         """Return latitude."""
-        return self._vehicle.location.latitude
-
-    #    @property
-    #    def extra_state_attributes(self):
-    #        """Return device state attributes."""
-    ##        return {
-    #           "heading": self._car.heading,
-    #           "speed": self._car.speed,
-    #       }
+        return self.coordinator.data[self._vehicle_id].location.latitude
 
     @property
-    def force_update(self):
+    def force_update(self) -> bool:
         """Disable forced updated since we are polling via the coordinator updates."""
         return False
