@@ -18,7 +18,7 @@ from homeassistant.const import (
     #    UnitOfPressure,
     #    UnitOfSpeed,
     #    UnitOfTemperature,
-    #    UnitOfTime,
+    UnitOfTime,
 )
 from homeassistant.helpers.icon import icon_for_battery_level
 
@@ -51,6 +51,9 @@ async def async_setup_entry(
         )
         entities.append(XpengCarRange(vehicle_id, entry.runtime_data.coordinator))
         entities.append(XpengCarChargeRate(vehicle_id, entry.runtime_data.coordinator))
+        entities.append(
+            XpengCarChargeTimeRemaining(vehicle_id, entry.runtime_data.coordinator)
+        )
 
     async_add_entities(entities, update_before_add=True)
 
@@ -168,3 +171,21 @@ class XpengCarChargeRate(XpengEntity, SensorEntity):
     def native_value(self) -> float:
         """Return range."""
         return self.coordinator.data[self._vehicle_id].charge_state.charge_rate or 0
+
+
+class XpengCarChargeTimeRemaining(XpengEntity, SensorEntity):
+    """Representation of the Xpeng remaining charge time."""
+
+    entity_name = "charge time remaining"
+    _attr_device_class = SensorDeviceClass.DURATION
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = UnitOfTime.MINUTES
+    _attr_icon = "mdi:flash"
+
+    @property
+    def native_value(self) -> float:
+        """Return range."""
+        return (
+            self.coordinator.data[self._vehicle_id].charge_state.charge_time_remaining
+            or 0
+        )
