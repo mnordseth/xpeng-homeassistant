@@ -13,14 +13,9 @@ from .entity import XpengEntity
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
-    from .enode_models import Vehicle
-    from .coordinator import XpengDataUpdateCoordinator
     from .data import XpengConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
-
-if TYPE_CHECKING:
-    from .coordinator import XpengDataUpdateCoordinator
 
 
 async def async_setup_entry(
@@ -42,12 +37,6 @@ class XpengCarLocation(XpengEntity, TrackerEntity):
 
     entity_name = "location tracker"
 
-    def __init__(
-        self, vehicle: Vehicle, coordinator: XpengDataUpdateCoordinator
-    ) -> None:
-        """Create device tracker for Xpeng vehicle."""
-        super().__init__(vehicle, coordinator)
-
     @property
     def source_type(self):
         """Return device tracker source type."""
@@ -56,12 +45,12 @@ class XpengCarLocation(XpengEntity, TrackerEntity):
     @property
     def longitude(self) -> float:
         """Return longitude."""
-        return self.coordinator.data[self._vehicle_id].location.longitude
+        return self.vehicle.location.longitude
 
     @property
     def latitude(self) -> float:
         """Return latitude."""
-        return self.coordinator.data[self._vehicle_id].location.latitude
+        return self.vehicle.location.latitude
 
     @property
     def force_update(self) -> bool:

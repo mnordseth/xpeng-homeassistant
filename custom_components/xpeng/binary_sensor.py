@@ -24,7 +24,7 @@ async def async_setup_entry(
     """Set up the sensor platform."""
     entities = []
     for vehicle_id, vehicle in enumerate(entry.runtime_data.client.vehicles):
-        _LOGGER.debug("Setting up sensor for %s", vehicle)
+        _LOGGER.debug("Setting up binary sensors for %s", vehicle)
         entities.append(XpengCarCharging(vehicle_id, entry.runtime_data.coordinator))
         entities.append(XpengCarPluggedIn(vehicle_id, entry.runtime_data.coordinator))
 
@@ -41,13 +41,7 @@ class XpengCarCharging(XpengEntity, BinarySensorEntity):
     @property
     def is_on(self) -> bool:
         """Return the state of the binary sensor."""
-        # _LOGGER.debug(
-        #    "XpengCarCharging.is_on(): %s Coordinator data: %s",
-        #    self._vehicle.charge_state.is_charging,
-        #    self.coordinator.data,
-        # )
-        return self.coordinator.data[self._vehicle_id].charge_state.is_charging
-        # return self._vehicle.charge_state.is_charging
+        return self.vehicle.charge_state.is_charging
 
 
 class XpengCarPluggedIn(XpengEntity, BinarySensorEntity):
@@ -60,4 +54,4 @@ class XpengCarPluggedIn(XpengEntity, BinarySensorEntity):
     @property
     def is_on(self) -> bool:
         """Return the state of the binary sensor."""
-        return self.coordinator.data[self._vehicle_id].charge_state.is_plugged_in
+        return self.vehicle.charge_state.is_plugged_in

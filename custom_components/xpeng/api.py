@@ -82,13 +82,12 @@ class XpengApiClient:
 
     async def async_refresh_token(self) -> None:
         expires_in = self._token_expires_at - datetime.datetime.now(tz=datetime.UTC)
-        if expires_in < datetime.timedelta(seconds=120):
+        if expires_in < datetime.timedelta(seconds=180):
             LOGGER.debug("Refreshing token, expires in %s", expires_in)
             await self.async_get_token()
 
     async def async_get_data(self) -> Any:
         """Get data from the API."""
-        LOGGER.debug("async_get_data()")
         result = await self._api_wrapper(
             method="get",
             url=f"{ENODE_URL}/vehicles",
