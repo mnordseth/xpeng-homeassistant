@@ -1,6 +1,7 @@
 """Support for Xpeng device tracker."""
 
 from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING
 
@@ -9,10 +10,10 @@ from homeassistant.components.device_tracker.config_entry import TrackerEntity
 
 from .entity import XpengEntity
 
-
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
     from .data import XpengConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
@@ -38,7 +39,7 @@ class XpengCarLocation(XpengEntity, TrackerEntity):
     entity_name = "location tracker"
 
     @property
-    def source_type(self):
+    def source_type(self) -> str:
         """Return device tracker source type."""
         return const.ATTR_GPS
 

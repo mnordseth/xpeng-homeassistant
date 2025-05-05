@@ -9,7 +9,6 @@ from homeassistant.components.sensor import (
     SensorEntity,
     SensorStateClass,
 )
-
 from homeassistant.const import (
     PERCENTAGE,
     #    UnitOfEnergy,
@@ -22,12 +21,12 @@ from homeassistant.const import (
 )
 from homeassistant.helpers.icon import icon_for_battery_level
 
-
 from .entity import XpengEntity
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
     from .data import XpengConfigEntry
 
 import logging
@@ -78,7 +77,7 @@ class XpengCarBattery(XpengEntity, SensorEntity):
         return self.vehicle.charge_state.battery_level
 
     @property
-    def icon(self):
+    def icon(self) -> str:
         """Return icon for the battery."""
         charging = self.vehicle.charge_state.is_charging
 
@@ -87,7 +86,7 @@ class XpengCarBattery(XpengEntity, SensorEntity):
         )
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict:
         """Return device state attributes."""
         return {
             "raw_soc": self.vehicle.charge_state.battery_level,
@@ -115,7 +114,7 @@ class XpengCarBatteryTarget(XpengEntity, SensorEntity):
         return self.vehicle.charge_state.charge_limit
 
     @property
-    def icon(self):
+    def icon(self) -> str:
         """Return icon for the battery."""
         return icon_for_battery_level(battery_level=self.native_value)
 

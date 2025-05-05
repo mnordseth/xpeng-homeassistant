@@ -1,6 +1,7 @@
 """XpengEntity class."""
 
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from homeassistant.helpers.device_registry import DeviceInfo
@@ -28,7 +29,6 @@ class XpengEntity(CoordinatorEntity[XpengDataUpdateCoordinator]):
         super().__init__(coordinator)
 
         self._vehicle_id = vehicle_id
-        # vehicle = coordinator.data[self._vehicle_id]
         display_name = (
             f"{self.vehicle.information.brand} {self.vehicle.information.model}"
         )

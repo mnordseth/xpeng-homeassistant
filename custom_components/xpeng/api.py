@@ -7,11 +7,11 @@ import socket
 from typing import Any
 
 import aiohttp
-from aiohttp import BasicAuth
 import async_timeout
+from aiohttp import BasicAuth
 
-from .enode_models import EnodeResponse
 from .const import LOGGER
+from .enode_models import EnodeResponse
 
 ENODE_URL = "https://enode-api.production.enode.io"
 ENODE_OAUTH_URL = "https://oauth.production.enode.io/"
@@ -81,6 +81,7 @@ class XpengApiClient:
         ) + datetime.timedelta(seconds=self._token_expires)
 
     async def async_refresh_token(self) -> None:
+        """Refresh oauth token before expiry."""
         expires_in = self._token_expires_at - datetime.datetime.now(tz=datetime.UTC)
         if expires_in < datetime.timedelta(seconds=180):
             LOGGER.debug("Refreshing token, expires in %s", expires_in)

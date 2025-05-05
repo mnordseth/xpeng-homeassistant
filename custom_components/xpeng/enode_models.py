@@ -1,9 +1,12 @@
+"""Models for the Xpeng Enode API response."""
+
 from dataclasses import dataclass
-from typing import List, Optional, Dict, Any
 from datetime import datetime
+from typing import Any
 
 
-def parse_datetime(dt_str: Optional[str]) -> Optional[datetime]:
+def parse_datetime(dt_str: str | None) -> datetime | None:
+    """Parse an ISO format datetime string to a datetime object."""
     if not dt_str:
         return None
     return datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
@@ -11,14 +14,17 @@ def parse_datetime(dt_str: Optional[str]) -> Optional[datetime]:
 
 @dataclass
 class Information:
-    display_name: Optional[str]
+    """Vehicle information data."""
+
+    display_name: str | None
     vin: str
     brand: str
     model: str
     year: int
 
     @classmethod
-    def from_json(cls, data: Dict[str, Any]) -> "Information":
+    def from_json(cls, data: dict[str, Any]) -> "Information":
+        """Create an Information instance from JSON data."""
         return cls(
             display_name=data["displayName"],
             vin=data["vin"],
@@ -30,8 +36,10 @@ class Information:
 
 @dataclass
 class ChargeState:
-    charge_rate: Optional[float]
-    charge_time_remaining: Optional[int]
+    """Vehicle charging state data."""
+
+    charge_rate: float | None
+    charge_time_remaining: int | None
     is_fully_charged: bool
     is_plugged_in: bool
     is_charging: bool
@@ -39,12 +47,13 @@ class ChargeState:
     range: int
     battery_capacity: float
     charge_limit: int
-    last_updated: Optional[datetime]
+    last_updated: datetime | None
     power_delivery_state: str
-    max_current: Optional[int]
+    max_current: int | None
 
     @classmethod
-    def from_json(cls, data: Dict[str, Any]) -> "ChargeState":
+    def from_json(cls, data: dict[str, Any]) -> "ChargeState":
+        """Create a ChargeState instance from JSON data."""
         return cls(
             charge_rate=data["chargeRate"],
             charge_time_remaining=data["chargeTimeRemaining"],
@@ -63,12 +72,15 @@ class ChargeState:
 
 @dataclass
 class SmartChargingPolicy:
-    deadline: Optional[datetime]
+    """Vehicle smart charging policy data."""
+
+    deadline: datetime | None
     is_enabled: bool
     minimum_charge_limit: int
 
     @classmethod
-    def from_json(cls, data: Dict[str, Any]) -> "SmartChargingPolicy":
+    def from_json(cls, data: dict[str, Any]) -> "SmartChargingPolicy":
+        """Create a SmartChargingPolicy instance from JSON data."""
         return cls(
             deadline=parse_datetime(data["deadline"]),
             is_enabled=data["isEnabled"],
@@ -78,13 +90,16 @@ class SmartChargingPolicy:
 
 @dataclass
 class Location:
-    id: Optional[str]
+    """Vehicle location data."""
+
+    id: str | None
     latitude: float
     longitude: float
-    last_updated: Optional[datetime]
+    last_updated: datetime | None
 
     @classmethod
-    def from_json(cls, data: Dict[str, Any]) -> "Location":
+    def from_json(cls, data: dict[str, Any]) -> "Location":
+        """Create a Location instance from JSON data."""
         return cls(
             id=data["id"],
             latitude=data["latitude"],
@@ -95,11 +110,14 @@ class Location:
 
 @dataclass
 class Odometer:
-    distance: Optional[float]
-    last_updated: Optional[datetime]
+    """Vehicle odometer data."""
+
+    distance: float | None
+    last_updated: datetime | None
 
     @classmethod
-    def from_json(cls, data: Dict[str, Any]) -> "Odometer":
+    def from_json(cls, data: dict[str, Any]) -> "Odometer":
+        """Create an Odometer instance from JSON data."""
         return cls(
             distance=data["distance"],
             last_updated=parse_datetime(data["lastUpdated"]),
@@ -108,11 +126,14 @@ class Odometer:
 
 @dataclass
 class Capability:
-    intervention_ids: List[str]
+    """Vehicle capability data."""
+
+    intervention_ids: list[str]
     is_capable: bool
 
     @classmethod
-    def from_json(cls, data: Dict[str, Any]) -> "Capability":
+    def from_json(cls, data: dict[str, Any]) -> "Capability":
+        """Create a Capability instance from JSON data."""
         return cls(
             intervention_ids=data.get("interventionIds", []),
             is_capable=data.get("isCapable", False),
@@ -121,6 +142,8 @@ class Capability:
 
 @dataclass
 class Capabilities:
+    """Vehicle capabilities data."""
+
     information: Capability
     charge_state: Capability
     location: Capability
@@ -131,7 +154,8 @@ class Capabilities:
     smart_charging: Capability
 
     @classmethod
-    def from_json(cls, data: Dict[str, Any]) -> "Capabilities":
+    def from_json(cls, data: dict[str, Any]) -> "Capabilities":
+        """Create a Capabilities instance from JSON data."""
         return cls(
             information=Capability.from_json(data["information"]),
             charge_state=Capability.from_json(data["chargeState"]),
@@ -146,21 +170,24 @@ class Capabilities:
 
 @dataclass
 class Vehicle:
+    """Vehicle data."""
+
     id: str
     user_id: str
     vendor: str
     is_reachable: bool
-    last_seen: Optional[datetime]
+    last_seen: datetime | None
     information: Information
     charge_state: ChargeState
     smart_charging_policy: SmartChargingPolicy
     location: Location
     odometer: Odometer
     capabilities: Capabilities
-    scopes: List[str]
+    scopes: list[str]
 
     @classmethod
-    def from_json(cls, data: Dict[str, Any]) -> "Vehicle":
+    def from_json(cls, data: dict[str, Any]) -> "Vehicle":
+        """Create a Vehicle instance from JSON data."""
         return cls(
             id=data["id"],
             user_id=data["userId"],
@@ -181,11 +208,14 @@ class Vehicle:
 
 @dataclass
 class Pagination:
-    after: Optional[str]
-    before: Optional[str]
+    """Pagination data for API responses."""
+
+    after: str | None
+    before: str | None
 
     @classmethod
-    def from_json(cls, data: Dict[str, Any]) -> "Pagination":
+    def from_json(cls, data: dict[str, Any]) -> "Pagination":
+        """Create a Pagination instance from JSON data."""
         return cls(
             after=data["after"],
             before=data["before"],
@@ -194,11 +224,14 @@ class Pagination:
 
 @dataclass
 class EnodeResponse:
-    data: List[Vehicle]
+    """Complete Enode API response data."""
+
+    data: list[Vehicle]
     pagination: Pagination
 
     @classmethod
-    def from_json(cls, json_data: Dict[str, Any]) -> "EnodeResponse":
+    def from_json(cls, json_data: dict[str, Any]) -> "EnodeResponse":
+        """Create an EnodeResponse instance from JSON data."""
         vehicles = [
             Vehicle.from_json(vehicle_data) for vehicle_data in json_data["data"]
         ]
