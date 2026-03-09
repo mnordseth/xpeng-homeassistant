@@ -14,7 +14,7 @@ from .const import LOGGER
 from .enode_models import EnodeResponse
 
 ENODE_URL = "https://enode-api.production.enode.io"
-ENODE_OAUTH_URL = "https://oauth.production.enode.io/"
+ENODE_OAUTH_URL = "https://oauth.production.enode.io"
 
 
 class XpengApiClientError(Exception):
